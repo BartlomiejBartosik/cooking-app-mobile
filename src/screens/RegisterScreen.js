@@ -19,7 +19,7 @@ const RegisterScreen = ({ navigation, route }) => {
         try {
             await onRegister({ name: name.trim(), surname: surname.trim(), email: email.trim(), password });
             Alert.alert("Sukces", "Konto utworzone. Zaloguj się.", [
-                { text: "OK", onPress: () => navigation.navigate('Login')}
+                { text: "OK", onPress: () => navigation.navigate('LoginScreen')}
             ]);
         } catch (e) {
             const msg = e?.response?.data?.message || "Rejestracja nieudana";
@@ -44,6 +44,13 @@ const RegisterScreen = ({ navigation, route }) => {
                     <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={busy}>
                         {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>SIGN UP</Text>}
                     </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => navigation.navigate("LoginScreen")}>
+                        <Text style={styles.switchText}>
+                            Masz już konto? <Text style={styles.switchTextBold}>Sign In</Text>
+                        </Text>
+                    </TouchableOpacity>
+
                 </View>
             </View>
         </SafeAreaView>
