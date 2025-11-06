@@ -6,6 +6,7 @@ import HomeScreen from "../screens/HomeScreen";
 import SearchScreen from "../screens/SearchScreen";
 import PantryScreen from "../screens/PantryScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import FavoritesScreen from "../screens/FavoritesScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -21,14 +22,16 @@ export default function BottomNav() {
                     if (route.name === "Search") icon = focused ? "search" : "search-outline";
                     if (route.name === "Pantry") icon = focused ? "basket" : "basket-outline";
                     if (route.name === "Profile") icon = focused ? "person" : "person-outline";
+                    if (route.name === "Favorites") icon = focused ? "heart" : "heart-outline";
                     return <Ionicons name={icon} size={size} />;
                 },
             })}
         >
             {<Tab.Screen name="Home" component={HomeScreen} options={{ title: "Home" }} /> }
-            {<Tab.Screen name="Search" component={SearchScreen} options={{ title: "Search" }} /> }
-            {<Tab.Screen name="Pantry" component={PantryScreen} options={{ title: "Pantry" }} /> }
-            {<Tab.Screen name="Profile" component={ProfileScreen} options={{ title: "Profile" }} /> }
+            {<Tab.Screen name="Search" component={SearchScreen} options={{ title: "Wyszukaj" }} /> }
+            {<Tab.Screen name="Pantry" component={PantryScreen} options={{ title: "Spiżarnia" }} /> }
+            {<Tab.Screen name="Profile" component={ProfileScreen} options={{ title: "Profil" }} /> }
+            {<Tab.Screen name="Favorites" component={FavoritesScreen} options={{ title: "Ulubione" }} />}
         </Tab.Navigator>
     );
 }

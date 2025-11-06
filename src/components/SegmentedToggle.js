@@ -22,7 +22,7 @@ export default function SegmentedToggle({ options, value, onChange, onLockedPres
                     <Pressable
                         key={opt.key}
                         onPress={handlePress}
-                        disabled={false} // Pressable działa, my sami blokujemy logikę
+                        disabled={false}
                         style={[
                             styles.segment,
                             i === 0 && styles.left,

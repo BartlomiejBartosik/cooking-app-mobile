@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     View,
     Text,
@@ -16,6 +16,8 @@ import { useUserContext } from "../context/UserContext";
 import { searchIngredients } from "../lib/ingredients";
 import { updatePantryItem } from "../lib/pantry";
 
+const DEBOUNCE_MS = 250;
+
 export default function PantryAddItemScreen({ navigation }) {
     const { token } = useUserContext();
 
@@ -28,28 +30,51 @@ export default function PantryAddItemScreen({ navigation }) {
 
     const [saving, setSaving] = useState(false);
 
-    const handleSearch = async () => {
-        if (!searchText.trim()) {
+    // do debounce + anulowania poprzedniego żądania
+    const debounceRef = useRef(null);
+    const abortRef = useRef(null);
+
+    const runSearch = async (text) => {
+        const q = (text ?? "").trim();
+        if (q.length < 2) {
+            if (abortRef.current) abortRef.current.abort();
             setResults([]);
+            setLoadingSearch(false);
             return;
         }
         try {
+            if (abortRef.current) abortRef.current.abort();
+            const controller = new AbortController();
+            abortRef.current = controller;
+
             setLoadingSearch(true);
-            const data = await searchIngredients(searchText.trim(), token);
+            const data = await searchIngredients(q, token, controller.signal);
             setResults(data);
         } catch (err) {
-            console.log("searchIngredients error:", err?.response?.status, err?.response?.data);
-            Alert.alert("Błąd", "Nie udało się pobrać składników.");
+            if (err?.name !== "CanceledError" && err?.name !== "AbortError") {
+                console.log("searchIngredients error:", err?.response?.status, err?.response?.data);
+                Alert.alert("Błąd", "Nie udało się pobrać składników.");
+            }
         } finally {
             setLoadingSearch(false);
         }
     };
+
+    // live search z debounce
+    useEffect(() => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => runSearch(searchText), DEBOUNCE_MS);
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, [searchText]);
 
     const chooseIngredient = (ing) => {
         setSelectedIngredient(ing);
         setAmount("");
         setResults([]);
         setSearchText(ing.name);
+        if (abortRef.current) abortRef.current.abort();
     };
 
     const handleSave = async () => {
@@ -58,7 +83,7 @@ export default function PantryAddItemScreen({ navigation }) {
             return;
         }
 
-        const parsed = parseFloat(amount.replace(",", "."));
+        const parsed = parseFloat((amount || "").replace(",", "."));
         if (isNaN(parsed) || parsed <= 0) {
             Alert.alert("Błędna ilość", "Podaj prawidłową liczbę większą od zera.");
             return;
@@ -71,14 +96,7 @@ export default function PantryAddItemScreen({ navigation }) {
             Alert.alert(
                 "Dodano",
                 `${selectedIngredient.name} (${parsed} ${selectedIngredient.unit}) zapisane w spiżarni.`,
-                [
-                    {
-                        text: "OK",
-                        onPress: () => {
-                            navigation.goBack();
-                        },
-                    },
-                ]
+                [{ text: "OK", onPress: () => navigation.goBack() }]
             );
         } catch (err) {
             console.log("updatePantryItem error:", err?.response?.status, err?.response?.data);
@@ -103,15 +121,14 @@ export default function PantryAddItemScreen({ navigation }) {
                         value={searchText}
                         onChangeText={setSearchText}
                         returnKeyType="search"
-                        onSubmitEditing={handleSearch}
                     />
-                    <TouchableOpacity style={styles.searchBtn} onPress={handleSearch}>
+                    <View style={styles.searchBtn}>
                         {loadingSearch ? (
                             <ActivityIndicator />
                         ) : (
                             <Ionicons name="search" size={20} color="#fff" />
                         )}
-                    </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* 2. Wyniki wyszukiwania */}
@@ -119,6 +136,7 @@ export default function PantryAddItemScreen({ navigation }) {
                     <View style={styles.resultsBox}>
                         <Text style={styles.resultsHeader}>Wyniki</Text>
                         <FlatList
+                            keyboardShouldPersistTaps="handled"
                             data={results}
                             keyExtractor={(item) => String(item.id)}
                             renderItem={({ item }) => (
@@ -133,11 +151,7 @@ export default function PantryAddItemScreen({ navigation }) {
                                         </Text>
                                     </View>
                                     {selectedIngredient?.id === item.id && (
-                                        <Ionicons
-                                            name="checkmark-circle"
-                                            size={20}
-                                            color="green"
-                                        />
+                                        <Ionicons name="checkmark-circle" size={20} color="green" />
                                     )}
                                 </TouchableOpacity>
                             )}
@@ -148,14 +162,12 @@ export default function PantryAddItemScreen({ navigation }) {
                 <View style={styles.selectedBox}>
                     <Text style={styles.label}>Wybrano:</Text>
                     {selectedIngredient ? (
-                        <>
-                            <Text style={styles.selectedName}>
-                                {selectedIngredient.name} ({selectedIngredient.unit}, {selectedIngredient.category})
-                            </Text>
-                        </>
+                        <Text style={styles.selectedName}>
+                            {selectedIngredient.name} ({selectedIngredient.unit}, {selectedIngredient.category})
+                        </Text>
                     ) : (
                         <Text style={styles.placeholderText}>
-                            Brak - wybierz coś z wyszukiwarki powyżej
+                            Brak — wpisz nazwę i wybierz z listy powyżej
                         </Text>
                     )}
 
@@ -173,10 +185,7 @@ export default function PantryAddItemScreen({ navigation }) {
                 </View>
 
                 <TouchableOpacity
-                    style={[
-                        styles.saveBtn,
-                        !selectedIngredient && styles.saveBtnDisabled,
-                    ]}
+                    style={[styles.saveBtn, !selectedIngredient && styles.saveBtnDisabled]}
                     onPress={handleSave}
                     disabled={!selectedIngredient || saving}
                 >
@@ -192,28 +201,12 @@ export default function PantryAddItemScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    wrap: {
-        flex: 1,
-        backgroundColor: "#fff",
-    },
-    container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: "#fff",
-    },
+    wrap: { flex: 1, backgroundColor: "#fff" },
+    container: { flex: 1, padding: 16, backgroundColor: "#fff" },
 
-    label: {
-        fontSize: 14,
-        fontWeight: "500",
-        color: "#222",
-        marginBottom: 6,
-    },
+    label: { fontSize: 14, fontWeight: "500", color: "#222", marginBottom: 6 },
 
-    rowSearch: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 16,
-    },
+    rowSearch: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
     searchInput: {
         flex: 1,
         borderWidth: 1,
@@ -232,6 +225,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         alignItems: "center",
         justifyContent: "center",
+        minWidth: 44,
     },
 
     resultsBox: {
@@ -240,79 +234,56 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         backgroundColor: "#fafafa",
         marginBottom: 20,
-        maxHeight: 200,
+        maxHeight: 240,
         overflow: "hidden",
     },
     resultsHeader: {
-        fontSize: 13,
-        fontWeight: "600",
-        color: "#555",
         paddingHorizontal: 12,
         paddingVertical: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
-        backgroundColor: "#f2f2f2",
-    },
-    resultRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 12,
-        paddingVertical: 10,
+        fontWeight: "600",
+        color: "#333",
         borderBottomWidth: 1,
         borderBottomColor: "#eee",
     },
-    resultName: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#111",
+    resultRow: {
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
     },
-    resultMeta: {
-        fontSize: 12,
-        color: "#666",
-        marginTop: 2,
-    },
+    resultName: { fontSize: 16, color: "#111" },
+    resultMeta: { fontSize: 12, color: "#666", marginTop: 2 },
 
     selectedBox: {
         borderWidth: 1,
         borderColor: "#ddd",
         borderRadius: 10,
-        padding: 16,
+        padding: 12,
         backgroundColor: "#fafafa",
-        marginBottom: 24,
+        marginBottom: 20,
     },
-    selectedName: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#111",
-    },
-    placeholderText: {
-        color: "#888",
-        fontSize: 13,
-    },
+    selectedName: { fontSize: 16, fontWeight: "600", color: "#111" },
+    placeholderText: { fontSize: 14, color: "#777" },
+
     amountInput: {
-        marginTop: 6,
+        height: 44,
         borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 8,
+        borderColor: "#ddd",
+        borderRadius: 10,
         paddingHorizontal: 12,
-        paddingVertical: 10,
         fontSize: 16,
         backgroundColor: "#fff",
+        marginTop: 6,
     },
 
     saveBtn: {
         backgroundColor: "#b89c7d",
-        borderRadius: 12,
+        borderRadius: 10,
         paddingVertical: 14,
         alignItems: "center",
-        justifyContent: "center",
     },
-    saveBtnDisabled: {
-        backgroundColor: "#cbbdab",
-    },
-    saveBtnText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "600",
-    },
+    saveBtnDisabled: { opacity: 0.5 },
+    saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 16 },
 });

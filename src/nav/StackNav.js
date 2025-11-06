@@ -9,6 +9,8 @@ import SearchScreen from "../screens/SearchScreen";
 import BottomNav from "./BottomNav";
 import PantryCategoryScreen from "../screens/PantryCategoryScreen";
 import PantryAddItemScreen from "../screens/PantryAddItemScreen";
+import RecipeDetailsScreen from "../screens/RecipeDetailsScreen";
+import CookingStepScreen from "../screens/CookingStepScreen";
 
 const Stack = createStackNavigator();
 
@@ -24,6 +26,8 @@ const StackNav = () => {
             {<Stack.Screen key="Search" name="SearchScreen" component={SearchScreen} />}
             {<Stack.Screen key="PantryCategory" name="PantryCategoryScreen" component={PantryCategoryScreen} />}
             {<Stack.Screen key="PantryAdd" name="PantryAddItemScreen" component={PantryAddItemScreen} />}
+            {<Stack.Screen key="RecipeDetails" name="RecipeDetailsScreen" component={RecipeDetailsScreen} />}
+            {<Stack.Screen key="CookingStep" name="CookingStepScreen" component={CookingStepScreen} />}
         </Stack.Navigator>
     );
 };

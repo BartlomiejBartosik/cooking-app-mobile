@@ -106,7 +106,7 @@ export default function HomeScreen({ navigation }) {
                     renderItem={({ item }) => (
                         <RecipeCard
                             item={item}
-                            onPress={() => navigation.navigate("RecipeDetails", { id: item.id })}
+                            onPress={() => navigation.navigate("RecipeDetailsScreen", { id: item.id })}
                         />
                     )}
                     contentContainerStyle={{ paddingBottom: 20 }}

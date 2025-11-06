@@ -35,3 +35,7 @@ export async function fetchRecipes(page = 0, size = DEFAULT_SIZE) {
     const { data } = await api.get("/api/recipes", { params: { page, size } });
     return data;
 }
+export async function getRecipeDetails(id) {
+    const { data } = await api.get(`/api/recipes/${id}`);
+    return data;
+}
