@@ -25,12 +25,11 @@ export default function PantryAddItemScreen({ navigation }) {
     const [loadingSearch, setLoadingSearch] = useState(false);
     const [results, setResults] = useState([]);
 
-    const [selectedIngredient, setSelectedIngredient] = useState(null); // {id,name,unit,category}
+    const [selectedIngredient, setSelectedIngredient] = useState(null);
     const [amount, setAmount] = useState("");
 
     const [saving, setSaving] = useState(false);
 
-    // do debounce + anulowania poprzedniego żądania
     const debounceRef = useRef(null);
     const abortRef = useRef(null);
 
@@ -112,7 +111,6 @@ export default function PantryAddItemScreen({ navigation }) {
             behavior={Platform.select({ ios: "padding", android: undefined })}
         >
             <View style={styles.container}>
-                {/* 1. Pasek wyszukiwania składnika */}
                 <Text style={styles.label}>Wyszukaj składnik</Text>
                 <View style={styles.rowSearch}>
                     <TextInput
@@ -131,7 +129,6 @@ export default function PantryAddItemScreen({ navigation }) {
                     </View>
                 </View>
 
-                {/* 2. Wyniki wyszukiwania */}
                 {results.length > 0 && (
                     <View style={styles.resultsBox}>
                         <Text style={styles.resultsHeader}>Wyniki</Text>

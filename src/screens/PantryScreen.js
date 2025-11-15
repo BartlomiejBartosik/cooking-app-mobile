@@ -1,20 +1,20 @@
 import React, { useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useUserContext } from "../context/UserContext";
 import LockedOverlay from "../components/LockedOverlay";
 import { fetchPantry } from "../lib/pantry";
 import { useFocusEffect } from "@react-navigation/native";
 
 const CATEGORIES = [
-    { key: "MEAT",        label: "Mięso",        icon: "restaurant" },
-    { key: "DAIRY",       label: "Nabiał",       icon: "ice-cream" },
+    { key: "MEAT",        label: "Mięso",        icon: "food-steak" },
+    { key: "DAIRY",       label: "Nabiał",       icon: "cheese" },
     { key: "FISHES",      label: "Ryby",         icon: "fish" },
     { key: "VEGETABLES",  label: "Warzywa",      icon: "leaf" },
-    { key: "FRUITS",      label: "Owoce",        icon: "nutrition" },
-    { key: "GRAINS",      label: "Zboża",        icon: "bag-handle" },
+    { key: "FRUITS",      label: "Owoce",        icon: "food-apple" },
+    { key: "GRAINS",      label: "Zboża",        icon: "seed" },
     { key: "FATS",        label: "Tłuszcze",     icon: "water" },
-    { key: "OTHER",       label: "Inne",         icon: "ellipsis-horizontal-circle" },
+    { key: "OTHER",       label: "Inne",         icon: "dots-circle" },
 ];
 
 export default function PantryScreen({ navigation }) {
@@ -72,7 +72,7 @@ export default function PantryScreen({ navigation }) {
                     navigation.navigate("PantryAddItemScreen", { pantryItems });
                 }}
             >
-                <Ionicons name="add-circle-outline" size={20} />
+                <MaterialCommunityIcons name="plus-circle-outline" size={20} />
                 <Text style={styles.addButtonText}>Dodaj składnik</Text>
             </TouchableOpacity>
 
@@ -97,7 +97,7 @@ export default function PantryScreen({ navigation }) {
                                 style={styles.categoryTile}
                                 onPress={() => openCategory(item.key)}
                             >
-                                <Ionicons
+                                <MaterialCommunityIcons
                                     name={item.icon}
                                     size={28}
                                     style={{ marginBottom: 8 }}

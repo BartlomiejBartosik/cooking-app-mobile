@@ -11,6 +11,10 @@ import PantryCategoryScreen from "../screens/PantryCategoryScreen";
 import PantryAddItemScreen from "../screens/PantryAddItemScreen";
 import RecipeDetailsScreen from "../screens/RecipeDetailsScreen";
 import CookingStepScreen from "../screens/CookingStepScreen";
+import AddReviewScreen from "../screens/AddReviewScreen";
+import ReviewsScreen from "../screens/ReviewsScreen";
+import ShoppingListDetailsScreen from "../screens/ShoppingListDetailsScreen";
+import ShoppingListsScreen from "../screens/ShoppingListsScreen";
 
 const Stack = createStackNavigator();
 
@@ -28,6 +32,10 @@ const StackNav = () => {
             {<Stack.Screen key="PantryAdd" name="PantryAddItemScreen" component={PantryAddItemScreen} />}
             {<Stack.Screen key="RecipeDetails" name="RecipeDetailsScreen" component={RecipeDetailsScreen} />}
             {<Stack.Screen key="CookingStep" name="CookingStepScreen" component={CookingStepScreen} />}
+            {<Stack.Screen key="Reviews" name="ReviewsScreen" component={ReviewsScreen}/>}
+            {<Stack.Screen key="AddReview" name="AddReviewScreen" component={AddReviewScreen}/>}
+            {<Stack.Screen key="ShoppingLists" name="ShoppingListsScreen" component={ShoppingListsScreen}/>}
+            {<Stack.Screen key="ShoppingListDetails" name="ShoppingListDetailsScreen" component={ShoppingListDetailsScreen}/>}
         </Stack.Navigator>
     );
 };

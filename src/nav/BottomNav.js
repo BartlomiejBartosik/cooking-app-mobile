@@ -7,6 +7,7 @@ import SearchScreen from "../screens/SearchScreen";
 import PantryScreen from "../screens/PantryScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
+import ShoppingListsScreen from "../screens/ShoppingListsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -23,6 +24,7 @@ export default function BottomNav() {
                     if (route.name === "Pantry") icon = focused ? "basket" : "basket-outline";
                     if (route.name === "Profile") icon = focused ? "person" : "person-outline";
                     if (route.name === "Favorites") icon = focused ? "heart" : "heart-outline";
+                    if (route.name === "ShoppingList") icon = focused ? "receipt" : "receipt-outline";
                     return <Ionicons name={icon} size={size} />;
                 },
             })}
@@ -32,6 +34,7 @@ export default function BottomNav() {
             {<Tab.Screen name="Pantry" component={PantryScreen} options={{ title: "Spiżarnia" }} /> }
             {<Tab.Screen name="Profile" component={ProfileScreen} options={{ title: "Profil" }} /> }
             {<Tab.Screen name="Favorites" component={FavoritesScreen} options={{ title: "Ulubione" }} />}
+            {<Tab.Screen name="ShoppingList" component={ShoppingListsScreen} options={{ title: "Lista Zakupów" }} />}
         </Tab.Navigator>
     );
 }
